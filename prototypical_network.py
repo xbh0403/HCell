@@ -69,13 +69,12 @@ class LearntPrototypes(nn.Module):
     #     return dists.cuda(), features
     
     def forward(self, *input, **kwargs):
-        embeddings = self.model(*input, **kwargs)
-
+        embeddings, x_hat, mean, log_var = self.model(*input, **kwargs)
         dists = torch.norm(
             embeddings[:, None, :] - self.prototypes[None, :, :], dim=-1
         )
 
-        return -dists, embeddings
+        return -dists, embeddings, x_hat, mean, log_var
 
 
 class HypersphericalProto(nn.Module):
