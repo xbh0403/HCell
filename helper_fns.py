@@ -38,3 +38,11 @@ def select_features(dataset_training, num_genes=36601):
     sc.pp.highly_variable_genes(sc_pp_train, n_top_genes=int(num_genes/4))
     sc_pp_train = sc_pp_train[:, sc_pp_train.var.highly_variable]
     return sc_pp_train
+
+# Preprocessing by PCA
+def prepPCA(dataset_training, num_genes=36601):
+    sc_pp_train = select_features(dataset_training, num_genes)
+    sc_pp_train = sc.pp.normalize_total(sc_pp_train, target_sum=1)
+    sc_pp_train = sc.pp.log1p(sc_pp_train)
+    sc_pp_train = sc.pp.pca(sc_pp_train, n_comps=int(num_genes/4))
+    return sc_pp_train
