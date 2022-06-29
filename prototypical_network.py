@@ -51,25 +51,11 @@ class LearntPrototypes(nn.Module):
         self.squarred = squarred
         self.dist = dist
         self.ph = None if ph is None else Pseudo_Huber(delta=ph)
-
-    # def forward(self, *input, **kwargs):
-    #     embeddings = self.model(*input, **kwargs)
-    #     features = embeddings
-    #     distributions = []
-    #     for center in self.prototypes:
-    #         distributions.append(multivariate_normal.MultivariateNormal(loc=center.detach().cpu(), covariance_matrix=torch.eye(6).detach().cpu()))
-
-    #     dists = torch.Tensor(np.zeros((embeddings.shape[0], self.prototypes.shape[0])))
-
-    #     for i in range(dists.shape[0]):
-    #         for j in range(dists.shape[1]):
-    #             dists[i,j] = torch.exp(distributions[j].log_prob(embeddings[i].detach().cpu()))
-        
-
-    #     return dists.cuda(), features
     
     def forward(self, *input, **kwargs):
-        embeddings, x_hat, mean, log_var = self.model(*input, **kwargs)
+        [x_hat, x, mean, log_var] = self.model(*input, **kwargs)
+        embeddings = self.model.reparameterize(mean, log_var)
+        # embeddings, x_hat, mean, log_var = self.model(*input, **kwargs)
         dists = torch.norm(
             embeddings[:, None, :] - self.prototypes[None, :, :], dim=-1
         )
