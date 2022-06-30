@@ -53,14 +53,14 @@ class LearntPrototypes(nn.Module):
         self.ph = None if ph is None else Pseudo_Huber(delta=ph)
     
     def forward(self, *input, **kwargs):
-        [x_hat, x, mean, log_var] = self.model(*input, **kwargs)
+        [[x_hat, decoder_mu, decoder_log_var], x, mean, log_var] = self.model(*input, **kwargs)
         embeddings = self.model.reparameterize(mean, log_var)
         # embeddings, x_hat, mean, log_var = self.model(*input, **kwargs)
         dists = torch.norm(
             embeddings[:, None, :] - self.prototypes[None, :, :], dim=-1
         )
 
-        return -dists, embeddings, x_hat, mean, log_var
+        return -dists, embeddings, x_hat, mean, log_var, decoder_mu, decoder_log_var
 
 
 class HypersphericalProto(nn.Module):

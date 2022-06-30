@@ -1,8 +1,10 @@
+from natsort import decoder
 import torch
-from torch import nn, relu
+from torch import nn
 from torch.nn import functional as F
 from base import BaseVAE
 
+from helper_fns import log_likelihood_Gaussian
 
 class VanillaVAE(BaseVAE):
 
@@ -46,9 +48,12 @@ class VanillaVAE(BaseVAE):
                     nn.ReLU(),
                 )
             )
-        modules.append(
-            nn.Linear(hidden_dims[-1], in_dims),
-        )
+        # modules.append(
+        #     nn.Linear(hidden_dims[-1], in_dims),
+        # )
+        self.decoder_mu = nn.Linear(hidden_dims[-1], in_dims)
+        self.decoder_var = nn.Linear(hidden_dims[-1], in_dims)
+
         self.decoder = nn.Sequential(*modules)
 
 
@@ -77,7 +82,12 @@ class VanillaVAE(BaseVAE):
         """
         result = self.decoder_input(z)
         result = self.decoder(result)
-        return result
+
+        mu = self.decoder_mu(result)
+        log_var = self.decoder_var(result)
+
+        x_hat = self.reparameterize(mu, log_var)
+        return x_hat, mu, log_var
 
     def reparameterize(self, mu, logvar):
         """
@@ -110,14 +120,17 @@ class VanillaVAE(BaseVAE):
         input = args[1]
         mu = args[2]
         log_var = args[3]
+        decoder_mu = args[4]
+        decoder_log_var = args[5]
 
         kld_weight = kwargs['M_N'] # Account for the minibatch samples from the dataset
-        recons_loss =F.mse_loss(recons, input)
-
+        # TODO Use likelihood instead.
+        # recons_loss =F.mse_loss(recons, input)
+        recons_loss = torch.mean(log_likelihood_Gaussian(input, decoder_mu, decoder_log_var), dim=0)/10
 
         kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1), dim = 0)
 
-        loss = recons_loss + kld_weight * kld_loss
+        loss = -recons_loss + kld_weight * kld_loss
         return {'loss': loss, 'Reconstruction_Loss':recons_loss.detach(), 'KLD':-kld_loss.detach()}
 
     def sample(self,

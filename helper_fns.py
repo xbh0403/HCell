@@ -1,5 +1,7 @@
 import numpy as np
 import scanpy as sc
+import torch
+import math
 
 # Train test split & Cross-validation
 def costumized_train_test_split(dataset, cross_validation=False, k_fold=5):
@@ -46,3 +48,8 @@ def prepPCA(dataset_training, num_genes=36601):
     sc_pp_train = sc.pp.log1p(sc_pp_train)
     sc_pp_train = sc.pp.pca(sc_pp_train, n_comps=int(num_genes/4))
     return sc_pp_train
+
+
+def log_likelihood_Gaussian(x, mu, log_var):
+    log_likelihood = torch.sum(-0.5 * torch.log(2*torch.tensor(math.pi).cuda()) - 0.5 * log_var - 0.5 * (x - mu)**2 / torch.exp(log_var), dim=1)
+    return log_likelihood
