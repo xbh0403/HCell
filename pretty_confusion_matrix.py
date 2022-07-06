@@ -19,7 +19,7 @@ import seaborn as sn
 from matplotlib.collections import QuadMesh
 
 
-def get_new_fig(fn, figsize=[9, 9]):
+def get_new_fig(fn, figsize=[20, 20]):
     """Init graphics"""
     fig1 = plt.figure(fn, figsize)
     ax1 = fig1.gca()  # Get Current Axis
@@ -245,6 +245,7 @@ def pp_matrix_from_data(
     y_test,
     predictions,
     columns=None,
+    fill_columns=True,
     annot=True,
     cmap="Oranges",
     fmt=".2f",
@@ -263,7 +264,7 @@ def pp_matrix_from_data(
     from sklearn.metrics import confusion_matrix
 
     # data
-    if not columns:
+    if fill_columns:
         from string import ascii_uppercase
 
         columns = [
@@ -273,7 +274,7 @@ def pp_matrix_from_data(
 
     confm = confusion_matrix(y_test, predictions)
     fz = 11
-    figsize = [9, 9]
+    figsize = [30, 30]
     show_null_values = 2
     df_cm = DataFrame(confm, index=columns, columns=columns)
     pp_matrix(
