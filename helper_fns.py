@@ -25,7 +25,7 @@ def costumized_train_test_split(dataset, cross_validation=False, k_fold=5):
         else:
             test_indices.extend(indices[:split])
             train_indices.extend(indices[split:])
-        return train_indices, test_indices, cv
+    return train_indices, test_indices, cv
 
 
 # Feature Selection by Scanpy
