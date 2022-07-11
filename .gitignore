@@ -3,3 +3,6 @@ Supporting_Materials/June_15th_Papers/scvis-dev/
 global.h5ad
 filtered_data.h5ad
 filtered_data_500.h5ad
+t-cells.h5ad
+b-cells.h5ad
+myeloid.h5ad
