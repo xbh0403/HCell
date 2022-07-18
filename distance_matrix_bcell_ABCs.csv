@@ -1,8 +1,0 @@
-,GC_B (I),GC_B (I),Memory_B_cells,Naive_B_cells,Plasma_cells,Plasmablasts,Pre-B
-GC_B (I),0,2,3,3,3,3,3
-GC_B (I),2,0,3,3,3,3,3
-Memory_B_cells,3,3,0,2,2,2,2
-Naive_B_cells,3,3,2,0,2,2,2
-Plasma_cells,3,3,2,2,0,2,2
-Plasmablasts,3,3,2,2,2,0,2
-Pre-B,3,3,2,2,2,2,0
