@@ -76,9 +76,13 @@ class LearntPrototypes(nn.Module):
             [[x_hat, decoder_mu, decoder_log_var], x, mean, log_var] = self.model(*input, **kwargs)
             embeddings = self.model.reparameterize(mean, log_var)
             # embeddings, x_hat, mean, log_var = self.model(*input, **kwargs)
-            dists = torch.norm(
-                embeddings[:, None, :] - self.prototypes[None, :, :], dim=-1
-            )
+            temp_1 = embeddings[:, None, :]
+            temp_2 = self.prototypes[None, :, :]
+            temp_3 = temp_1 - temp_2
+            # dists = torch.norm(
+            #     embeddings[:, None, :] - self.prototypes[None, :, :], dim=-1
+            # )
+            dists = torch.norm(temp_3, dim=-1)
 
             return -dists, embeddings, x_hat, mean, log_var, decoder_mu, decoder_log_var
 
