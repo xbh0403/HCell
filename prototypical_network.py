@@ -46,7 +46,7 @@ class LearntPrototypes(nn.Module):
                 torch.rand((n_prototypes, embedding_dim), device=device)
             ).requires_grad_(True)
             if prototypes is None
-            else nn.Parameter(prototypes).requires_grad_(False)
+            else nn.Parameter(prototypes).requires_grad_(True)
         )
         self.n_prototypes = n_prototypes
         self.squarred = squarred
