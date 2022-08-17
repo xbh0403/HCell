@@ -51,5 +51,8 @@ def prepPCA(dataset_training, num_genes=36601):
 
 
 def log_likelihood_Gaussian(x, mu, log_var):
-    log_likelihood = torch.sum(-0.5 * torch.log(2*torch.tensor(math.pi).cuda()) - 0.5 * log_var - 0.5 * (x - mu)**2 / torch.exp(log_var), dim=1)
+    if torch.cuda.is_available():
+        log_likelihood = torch.sum(-0.5 * torch.log(2*torch.tensor(math.pi).cuda()) - 0.5 * log_var - 0.5 * (x - mu)**2 / torch.exp(log_var), dim=1)
+    else:
+        log_likelihood = torch.sum(-0.5 * torch.log(2*torch.tensor(math.pi)) - 0.5 * log_var - 0.5 * (x - mu)**2 / torch.exp(log_var), dim=1)
     return log_likelihood
