@@ -56,3 +56,20 @@ def log_likelihood_Gaussian(x, mu, log_var):
     else:
         log_likelihood = torch.sum(-0.5 * torch.log(2*torch.tensor(math.pi)) - 0.5 * log_var - 0.5 * (x - mu)**2 / torch.exp(log_var), dim=1)
     return log_likelihood
+
+# Return the log likelihood of a Student's t distribution
+def log_likelihood_Student(x, mu, log_var, df):
+    if torch.cuda.is_available():
+        log_likelihood = torch.sum(-0.5 * torch.log(2*torch.tensor(math.pi).cuda()) - 0.5 * log_var - 0.5 * (x - mu)**2 / torch.exp(log_var) - 0.5 * torch.tensor(df).cuda() * torch.log(1 + (x - mu)**2 / torch.exp(log_var) / torch.tensor(df)), dim=1)
+    else:
+        log_likelihood = torch.sum(-0.5 * torch.log(2*torch.tensor(math.pi)) - 0.5 * log_var - 0.5 * (x - mu)**2 / torch.exp(log_var) - 0.5 * torch.tensor(df) * torch.log(1 + (x - mu)**2 / torch.exp(log_var) / torch.tensor(df)), dim=1)
+    return log_likelihood
+
+def log_likelihood_student(x, mu, log_var, df=2.0):
+    df=mu.shape[0]-1
+    sigma = torch.sqrt(torch.exp(log_var))
+
+    dist = torch.distributions.StudentT(df=df,
+                                        loc=mu,
+                                        scale=sigma)
+    return torch.sum(dist.log_prob(x), dim=1)

@@ -21,6 +21,7 @@ class LearntPrototypes(nn.Module):
         n_prototypes,
         embedding_dim,
         prototypes=None,
+        vars=None,
         squarred=False,
         ph=None,
         dist="euclidean",
@@ -48,6 +49,7 @@ class LearntPrototypes(nn.Module):
             if prototypes is None
             else nn.Parameter(prototypes).requires_grad_(True)
         )
+        self.vars = vars
         self.n_prototypes = n_prototypes
         self.squarred = squarred
         self.dist = dist
