@@ -4,11 +4,11 @@ import torch
 import math
 
 # Train test split & Cross-validation
-def costumized_train_test_split(dataset, cross_validation=False, k_fold=5):
+def costumized_train_test_split(dataset, cross_validation=False, obs_key='Manually_curated_celltype', k_fold=5):
     indices_by_celltypes = {}
     train_indices, test_indices, cv = [], [], []
-    for cell_type in dataset.obs['Manually_curated_celltype'].unique():
-        indices = np.where(dataset.obs['Manually_curated_celltype'] == cell_type)[0]
+    for cell_type in dataset.obs[obs_key].unique():
+        indices = np.where(dataset.obs[obs_key] == cell_type)[0]
         np.random.shuffle(indices)
         indices_by_celltypes.update({cell_type: indices})
         split = int(len(indices)/k_fold)
@@ -17,7 +17,7 @@ def costumized_train_test_split(dataset, cross_validation=False, k_fold=5):
                 temp = i*split
                 temp_test = list(indices[temp:temp+split])
                 temp_train = list(set(indices) - set(temp_test))
-                if cell_type != dataset.obs['Manually_curated_celltype'].unique()[0]:
+                if cell_type != dataset.obs[obs_key].unique()[0]:
                     cv[i].get("train").extend(temp_train)
                     cv[i].get("test").extend(temp_test)
                 else:

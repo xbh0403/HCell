@@ -1,0 +1,631 @@
+Creator "igraph version 0.9.9 Fri Aug 26 11:27:57 2022"
+Version 1
+graph
+[
+  directed 0
+  node
+  [
+    id 0
+    name "B cell"
+  ]
+  node
+  [
+    id 1
+    name "CD141-positive myeloid dendritic cell"
+  ]
+  node
+  [
+    id 2
+    name "CD1c-positive myeloid dendritic cell"
+  ]
+  node
+  [
+    id 3
+    name "CD4-positive helper T cell"
+  ]
+  node
+  [
+    id 4
+    name "CD4-positive, alpha-beta T cell"
+  ]
+  node
+  [
+    id 5
+    name "CD4-positive, alpha-beta memory T cell"
+  ]
+  node
+  [
+    id 6
+    name "CD8-positive, alpha-beta T cell"
+  ]
+  node
+  [
+    id 7
+    name "CD8-positive, alpha-beta cytokine secreting effector T cell"
+  ]
+  node
+  [
+    id 8
+    name "CD8-positive, alpha-beta cytotoxic T cell"
+  ]
+  node
+  [
+    id 9
+    name "CD8-positive, alpha-beta memory T cell"
+  ]
+  node
+  [
+    id 10
+    name "DN1 thymic pro-T cell"
+  ]
+  node
+  [
+    id 11
+    name "DN3 thymocyte"
+  ]
+  node
+  [
+    id 12
+    name "DN4 thymocyte"
+  ]
+  node
+  [
+    id 13
+    name "Langerhans cell"
+  ]
+  node
+  [
+    id 14
+    name "T cell"
+  ]
+  node
+  [
+    id 15
+    name "T follicular helper cell"
+  ]
+  node
+  [
+    id 16
+    name "basophil"
+  ]
+  node
+  [
+    id 17
+    name "classical monocyte"
+  ]
+  node
+  [
+    id 18
+    name "common myeloid progenitor"
+  ]
+  node
+  [
+    id 19
+    name "dendritic cell"
+  ]
+  node
+  [
+    id 20
+    name "double-positive, alpha-beta thymocyte"
+  ]
+  node
+  [
+    id 21
+    name "effector CD4-positive, alpha-beta T cell"
+  ]
+  node
+  [
+    id 22
+    name "effector CD8-positive, alpha-beta T cell"
+  ]
+  node
+  [
+    id 23
+    name "erythrocyte"
+  ]
+  node
+  [
+    id 24
+    name "erythroid lineage cell"
+  ]
+  node
+  [
+    id 25
+    name "erythroid progenitor cell"
+  ]
+  node
+  [
+    id 26
+    name "granulocyte"
+  ]
+  node
+  [
+    id 27
+    name "hematopoietic stem cell"
+  ]
+  node
+  [
+    id 28
+    name "immature natural killer cell"
+  ]
+  node
+  [
+    id 29
+    name "innate lymphoid cell"
+  ]
+  node
+  [
+    id 30
+    name "intermediate monocyte"
+  ]
+  node
+  [
+    id 31
+    name "leukocyte"
+  ]
+  node
+  [
+    id 32
+    name "liver dendritic cell"
+  ]
+  node
+  [
+    id 33
+    name "macrophage"
+  ]
+  node
+  [
+    id 34
+    name "mast cell"
+  ]
+  node
+  [
+    id 35
+    name "mature NK T cell"
+  ]
+  node
+  [
+    id 36
+    name "mature conventional dendritic cell"
+  ]
+  node
+  [
+    id 37
+    name "memory B cell"
+  ]
+  node
+  [
+    id 38
+    name "mesenchymal stem cell"
+  ]
+  node
+  [
+    id 39
+    name "microglial cell"
+  ]
+  node
+  [
+    id 40
+    name "monocyte"
+  ]
+  node
+  [
+    id 41
+    name "myeloid cell"
+  ]
+  node
+  [
+    id 42
+    name "myeloid dendritic cell"
+  ]
+  node
+  [
+    id 43
+    name "naive B cell"
+  ]
+  node
+  [
+    id 44
+    name "naive regulatory T cell"
+  ]
+  node
+  [
+    id 45
+    name "naive thymus-derived CD4-positive, alpha-beta T cell"
+  ]
+  node
+  [
+    id 46
+    name "naive thymus-derived CD8-positive, alpha-beta T cell"
+  ]
+  node
+  [
+    id 47
+    name "neutrophil"
+  ]
+  node
+  [
+    id 48
+    name "non-classical monocyte"
+  ]
+  node
+  [
+    id 49
+    name "plasma cell"
+  ]
+  node
+  [
+    id 50
+    name "plasmablast"
+  ]
+  node
+  [
+    id 51
+    name "plasmacytoid dendritic cell"
+  ]
+  node
+  [
+    id 52
+    name "platelet"
+  ]
+  node
+  [
+    id 53
+    name "regulatory T cell"
+  ]
+  node
+  [
+    id 54
+    name "thymocyte"
+  ]
+  node
+  [
+    id 55
+    name "type I NK T cell"
+  ]
+  node
+  [
+    id 56
+    name "CD4"
+  ]
+  node
+  [
+    id 57
+    name "CD8"
+  ]
+  node
+  [
+    id 58
+    name "NK"
+  ]
+  node
+  [
+    id 59
+    name "mature B cell"
+  ]
+  node
+  [
+    id 60
+    name "myeloid leukocyte"
+  ]
+  node
+  [
+    id 61
+    name "popv_immune"
+  ]
+  edge
+  [
+    source 61
+    target 38
+  ]
+  edge
+  [
+    source 61
+    target 27
+  ]
+  edge
+  [
+    source 61
+    target 31
+  ]
+  edge
+  [
+    source 61
+    target 18
+  ]
+  edge
+  [
+    source 41
+    target 18
+  ]
+  edge
+  [
+    source 52
+    target 41
+  ]
+  edge
+  [
+    source 41
+    target 24
+  ]
+  edge
+  [
+    source 60
+    target 41
+  ]
+  edge
+  [
+    source 25
+    target 24
+  ]
+  edge
+  [
+    source 24
+    target 23
+  ]
+  edge
+  [
+    source 60
+    target 40
+  ]
+  edge
+  [
+    source 60
+    target 34
+  ]
+  edge
+  [
+    source 60
+    target 33
+  ]
+  edge
+  [
+    source 60
+    target 26
+  ]
+  edge
+  [
+    source 60
+    target 42
+  ]
+  edge
+  [
+    source 40
+    target 17
+  ]
+  edge
+  [
+    source 40
+    target 30
+  ]
+  edge
+  [
+    source 48
+    target 40
+  ]
+  edge
+  [
+    source 39
+    target 33
+  ]
+  edge
+  [
+    source 26
+    target 16
+  ]
+  edge
+  [
+    source 47
+    target 26
+  ]
+  edge
+  [
+    source 42
+    target 2
+  ]
+  edge
+  [
+    source 42
+    target 1
+  ]
+  edge
+  [
+    source 31
+    target 19
+  ]
+  edge
+  [
+    source 31
+    target 29
+  ]
+  edge
+  [
+    source 31
+    target 0
+  ]
+  edge
+  [
+    source 31
+    target 14
+  ]
+  edge
+  [
+    source 32
+    target 19
+  ]
+  edge
+  [
+    source 36
+    target 19
+  ]
+  edge
+  [
+    source 51
+    target 19
+  ]
+  edge
+  [
+    source 19
+    target 13
+  ]
+  edge
+  [
+    source 42
+    target 36
+  ]
+  edge
+  [
+    source 59
+    target 0
+  ]
+  edge
+  [
+    source 49
+    target 0
+  ]
+  edge
+  [
+    source 50
+    target 0
+  ]
+  edge
+  [
+    source 59
+    target 43
+  ]
+  edge
+  [
+    source 59
+    target 37
+  ]
+  edge
+  [
+    source 57
+    target 14
+  ]
+  edge
+  [
+    source 56
+    target 14
+  ]
+  edge
+  [
+    source 53
+    target 14
+  ]
+  edge
+  [
+    source 54
+    target 14
+  ]
+  edge
+  [
+    source 58
+    target 14
+  ]
+  edge
+  [
+    source 57
+    target 6
+  ]
+  edge
+  [
+    source 7
+    target 6
+  ]
+  edge
+  [
+    source 22
+    target 6
+  ]
+  edge
+  [
+    source 9
+    target 6
+  ]
+  edge
+  [
+    source 8
+    target 6
+  ]
+  edge
+  [
+    source 46
+    target 6
+  ]
+  edge
+  [
+    source 56
+    target 4
+  ]
+  edge
+  [
+    source 4
+    target 3
+  ]
+  edge
+  [
+    source 45
+    target 4
+  ]
+  edge
+  [
+    source 5
+    target 4
+  ]
+  edge
+  [
+    source 21
+    target 4
+  ]
+  edge
+  [
+    source 15
+    target 4
+  ]
+  edge
+  [
+    source 44
+    target 4
+  ]
+  edge
+  [
+    source 53
+    target 44
+  ]
+  edge
+  [
+    source 54
+    target 20
+  ]
+  edge
+  [
+    source 54
+    target 11
+  ]
+  edge
+  [
+    source 54
+    target 12
+  ]
+  edge
+  [
+    source 54
+    target 10
+  ]
+  edge
+  [
+    source 58
+    target 35
+  ]
+  edge
+  [
+    source 58
+    target 28
+  ]
+  edge
+  [
+    source 58
+    target 55
+  ]
+]
