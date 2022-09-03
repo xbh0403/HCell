@@ -1,10 +1,15 @@
+from multiprocessing.dummy import Array
 import numpy as np
 import pandas as pd
 import scanpy as sc
 import torch
 import math
 import igraph as ig
+import matplotlib.pyplot as plt
+import seaborn as sns
 import biomart
+from sklearn.metrics import confusion_matrix
+
 
 # Train test split & Cross-validation
 def costumized_train_test_split(dataset, cross_validation=False, obs_key='Manually_curated_celltype', k_fold=5):
@@ -258,3 +263,138 @@ def get_ensembl_mappings():
          
     return ensembl_to_genesymbol
 
+def plot_distance_matrix(mode, model, dist_df, dataset, encoder_celltype, test_indices):
+    y_test = encoder_celltype.transform(dataset[test_indices].obs['Manually_curated_celltype'])
+    if mode == 'Net':
+        if torch.cuda.is_available():
+            y_pred = model(torch.tensor(dataset[test_indices].X).cuda())
+        else:
+            y_pred = model(torch.tensor(dataset[test_indices].X))
+    elif mode == 'Proto_Net':
+        if torch.cuda.is_available():
+            y_pred, y_embeddings = model(torch.tensor(dataset[test_indices].X).cuda())
+        else:
+            y_pred, y_embeddings = model(torch.tensor(dataset[test_indices].X))
+    y_pred = y_pred.detach().cpu().numpy()
+    y_pred = y_pred.argmax(axis=1)
+    dist_list = []
+    for i in range(len(y_pred)):
+        distance = dist_df.iloc[y_pred[i], y_test[i]]
+        dist_list.append(distance)
+    print(np.mean(np.array(dist_list)))
+    sns.displot(dist_list)
+    plt.show(block=False)
+
+
+def plot_confusion_matrix(mode, model, dataset, encoder, test_indices):
+    y_test = dataset[test_indices].obs['Manually_curated_celltype']
+    if mode == 'Net':
+        if torch.cuda.is_available():
+            y_pred = model(torch.tensor(dataset[test_indices].X).cuda())
+        else:
+            y_pred = model(torch.tensor(dataset[test_indices].X))
+    elif mode == 'Proto_Net':
+        if torch.cuda.is_available():
+            y_pred, y_embeddings = model(torch.tensor(dataset[test_indices].X).cuda())
+        else:
+            y_pred, y_embeddings = model(torch.tensor(dataset[test_indices].X))
+    y_pred = y_pred.detach().cpu().numpy()
+    pred = encoder.inverse_transform(y_pred.argmax(axis=1))
+    cm = confusion_matrix(y_test, pred)
+    # Normalise
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    fig, ax = plt.subplots(figsize=(30,30))
+    sns.heatmap(cm, annot=True, fmt='.2f', xticklabels=encoder.inverse_transform(range(len(dataset.obs['Manually_curated_celltype'].unique().tolist()))),
+                                        yticklabels=encoder.inverse_transform(range(len(dataset.obs['Manually_curated_celltype'].unique().tolist()))))
+    plt.xlabel('Actual')
+    plt.ylabel('Predicted')
+    plt.show(block=False)
+
+
+# Get number of cells by cell type
+def get_num_by_ct(label, dataset, obs):
+    return len(dataset.obs[dataset.obs[obs] == label])
+
+
+def get_weights(num_celltypes, encoder, dataset, obs):
+    weights = []
+    for i in range(num_celltypes):
+        weights.append(get_num_by_ct(encoder.inverse_transform([i])[0], dataset, obs))
+    weights = torch.tensor(weights, dtype=float)
+    return weights
+
+
+def get_embeddings_and_out(model, dataset, encoder):
+    if torch.cuda.is_available():
+        y_pred, y_embeddings = model(torch.tensor(dataset.X).cuda())
+    else:
+        y_pred, y_embeddings = model(torch.tensor(dataset.X))
+    y_pred = y_pred.detach().cpu().numpy()
+    y_pred = encoder.inverse_transform(y_pred.argmax(axis=1))
+    y_embeddings = y_embeddings.detach().cpu().numpy()
+    return y_embeddings, y_pred
+
+
+def get_prototypes_and_labels(model, encoder, num_celltypes):
+    embedding_prototypes = model.prototypes.detach().cpu().numpy()
+    embedding_prototypes_labels = encoder.inverse_transform(range(num_celltypes))
+    return embedding_prototypes, embedding_prototypes_labels
+
+
+def plot_embeddings_given_labels_and_datasets(train_embeddings ,test_embeddings, train_true_labels, test_true_labels, test_pred_labels, train_celltype, test_celltype, prototypes, prototypes_labels):
+    cell_count = 0
+    cell_pred = 0
+    for i in range(len(test_pred_labels)):
+        if test_true_labels[i] == test_celltype:
+            cell_count += 1
+            if test_pred_labels[i] == train_celltype:
+                cell_pred += 1
+    print("True positive " + test_celltype + ": " + str(cell_pred/cell_count * 100) + '%')
+
+    wrong_dict = {}
+    for i in range(len(test_true_labels)):
+        if test_true_labels[i] == test_celltype and test_pred_labels[i] != train_celltype:
+            if test_pred_labels[i] in wrong_dict.keys():
+                wrong_dict[test_pred_labels[i]] += 1
+            else:
+                wrong_dict[test_pred_labels[i]] = 1
+    print(wrong_dict)
+    
+    fig, ax = plt.subplots(figsize=(30, 20))
+    i = np.where(np.array(test_true_labels) == test_celltype)
+    ax.scatter(np.array(test_embeddings)[i,0], np.array(test_embeddings)[i,1], label="TEST DATASET")
+    i = np.where(np.array(train_true_labels) == train_celltype)
+    ax.scatter(np.array(train_embeddings)[i,0], np.array(train_embeddings)[i,1], label="TRAIN DATASET")
+    for i in range(prototypes.shape[0]):
+        ax.scatter(prototypes[i,0], prototypes[i,1], marker='x', s=100)
+        ax.annotate(prototypes_labels[i], (prototypes[i,0], prototypes[i,1]))
+    ax.legend()
+    plt.show()
+
+
+def plot_embeddings_scatter(embeddings, true_labels, embedding_prototypes, embedding_prototypes_labels):
+    fig, ax = plt.subplots(figsize=(30, 20))
+    for color in np.unique(np.array(true_labels)):
+        i = np.where(np.array(true_labels) == color)
+        ax.scatter(np.array(embeddings)[i,0], np.array(embeddings)[i,1], label=color)
+    for i in range(embedding_prototypes.shape[0]):
+        ax.scatter(embedding_prototypes[i,0], embedding_prototypes[i,1], marker='x', s=100)
+        ax.annotate(embedding_prototypes_labels[i], (embedding_prototypes[i,0], embedding_prototypes[i,1]))
+    ax.legend()
+    plt.show()
+
+
+def plot_embeddings_likelihood(model, encoder, pred_labels, embeddings, prototypes, prototypes_labels):
+    targets = torch.index_select(model.prototypes, 0, torch.tensor(encoder.transform(pred_labels)))
+    log_vars = torch.log(torch.index_select(model.vars, 0, torch.tensor(encoder.transform(pred_labels))))
+    training_embedding_likelihoods = log_likelihood_student(torch.tensor(embeddings), targets, log_vars)
+    training_embedding_likelihoods = np.array(training_embedding_likelihoods.detach())
+
+    fig, ax = plt.subplots(figsize=(30, 20))
+    plt.rcParams["figure.autolayout"] = True
+    points = ax.scatter(np.array(embeddings)[:,0], np.array(embeddings)[:,1], c=training_embedding_likelihoods)
+    fig.colorbar(points)
+    for i in range(prototypes.shape[0]):
+        ax.scatter(prototypes[i,0], prototypes[i,1], marker='x', s=100)
+        ax.annotate(prototypes_labels[i], (prototypes[i,0], prototypes[i,1]))
+    plt.show()
