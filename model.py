@@ -132,12 +132,12 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
         if mode == 'Proto_Net':
             if torch.cuda.is_available():
                 for i in range(len(num_celltypes)):
-                    out, embeddings = model(torch.tensor(dataset[dataset.obs['Manually_curated_celltype'] == encoder.inverse_transform([i])[0]].X)).cpu()
+                    out, embeddings = model(torch.tensor(dataset[dataset.obs[obs_name] == encoder.inverse_transform([i])[0]].X)).cpu()
                     vars.append(np.array(torch.var(embeddings, dim=0).detach().cpu()))
                 model.vars = torch.tensor(vars, dtype=float).cuda()
             else:
                 for i in range(len(num_celltypes)):
-                    out, embeddings = model(torch.tensor(dataset[dataset.obs['Manually_curated_celltype'] == encoder.inverse_transform([i])[0]].X))
+                    out, embeddings = model(torch.tensor(dataset[dataset.obs[obs_name] == encoder.inverse_transform([i])[0]].X))
                     vars.append(np.array(torch.var(embeddings, dim=0).detach()))
                 model.vars = torch.tensor(vars, dtype=float)
         t1 = time.time()
@@ -150,10 +150,10 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
         for batch in dataloader_testing:
             if torch.cuda.is_available():
                 x = batch.X.cuda()
-                y = batch.obs['Manually_curated_celltype'].type(torch.LongTensor).cuda()
+                y = batch.obs[obs_name].type(torch.LongTensor).cuda()
             else:
                 x = batch.X
-                y = batch.obs['Manually_curated_celltype'].type(torch.LongTensor)
+                y = batch.obs[obs_name].type(torch.LongTensor)
             y = y.squeeze()
             y.long()
             if mode == 'Net':
@@ -170,24 +170,26 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
 
 
 # logistic regression
-def train_logistic_regression(dataset, train_indices, test_indices, obs_name):
+def train_logistic_regression(dataset, train_indices, test_indices, obs_name, encoder):
     X_train = dataset.X[train_indices]
-    y_train = dataset.obs[obs_name][train_indices]
+    y_train = encoder.transform(dataset.obs[obs_name][train_indices])
     X_test = dataset.X[test_indices]
-    y_test = dataset.obs[obs_name][test_indices]
+    y_test = encoder.transform(dataset.obs[obs_name][test_indices])
     clf = LogisticRegression(random_state=0, solver='lbfgs', multi_class='multinomial').fit(X_train, y_train)
-    print('Train accuracy: {}'.format(clf.score(X_train, y_train)))
-    print('Test accuracy: {}'.format(clf.score(X_test, y_test)))
+    print('Logistic Regression')
+    print('Train error: {}%'.format((1 - clf.score(X_train, y_train))*100))
+    print('Test error: {}%'.format((1 - clf.score(X_test, y_test))*100))
     return clf
 
 
 # kNN
-def train_knn(dataset, train_indices, test_indices, obs_name):
+def train_knn(dataset, train_indices, test_indices, obs_name, encoder):
     X_train = dataset.X[train_indices]
-    y_train = dataset.obs[obs_name][train_indices]
+    y_train = encoder.transform(dataset.obs[obs_name][train_indices])
     X_test = dataset.X[test_indices]
-    y_test = dataset.obs[obs_name][test_indices]
+    y_test = encoder.transform(dataset.obs[obs_name][test_indices])
     clf = KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
-    print('Train accuracy: {}'.format(clf.score(X_train, y_train)))
-    print('Test accuracy: {}'.format(clf.score(X_test, y_test)))
+    print('kNN')
+    print('Train error: {}%'.format((1 - clf.score(X_train, y_train))*100))
+    print('Test error: {}%'.format((1 - clf.score(X_test, y_test))*100))
     return clf

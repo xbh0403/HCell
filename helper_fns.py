@@ -37,7 +37,7 @@ def costumized_train_test_split(dataset, cross_validation=False, obs_key='Manual
 
 
 # Feature Selection by Scanpy
-def select_features(dataset_training, num_genes=36601):
+def select_features(dataset_training, num_genes, list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner):
     print("feature_selection")
     dataset_training.var['mt'] = dataset_training.var_names.str.startswith('MT-', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)  # annotate the group of mitochondrial genes as 'mt'
     sc.pp.calculate_qc_metrics(dataset_training, qc_vars=['mt'], percent_top=None, log1p=False, inplace=True)
@@ -286,8 +286,8 @@ def plot_distance_matrix(mode, model, dist_df, dataset, encoder_celltype, test_i
     plt.show(block=False)
 
 
-def plot_confusion_matrix(mode, model, dataset, encoder, test_indices):
-    y_test = dataset[test_indices].obs['Manually_curated_celltype']
+def plot_confusion_matrix(mode, model, dataset, encoder, test_indices, obs_name):
+    y_test = dataset[test_indices].obs[obs_name]
     if mode == 'Net':
         if torch.cuda.is_available():
             y_pred = model(torch.tensor(dataset[test_indices].X).cuda())
@@ -304,8 +304,8 @@ def plot_confusion_matrix(mode, model, dataset, encoder, test_indices):
     # Normalise
     cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
     fig, ax = plt.subplots(figsize=(30,30))
-    sns.heatmap(cm, annot=True, fmt='.2f', xticklabels=encoder.inverse_transform(range(len(dataset.obs['Manually_curated_celltype'].unique().tolist()))),
-                                        yticklabels=encoder.inverse_transform(range(len(dataset.obs['Manually_curated_celltype'].unique().tolist()))))
+    sns.heatmap(cm, annot=True, fmt='.2f', xticklabels=encoder.inverse_transform(range(len(dataset.obs[obs_name].unique().tolist()))),
+                                        yticklabels=encoder.inverse_transform(range(len(dataset.obs[obs_name].unique().tolist()))))
     plt.xlabel('Actual')
     plt.ylabel('Predicted')
     plt.show(block=False)
@@ -341,6 +341,27 @@ def get_prototypes_and_labels(model, encoder, num_celltypes):
     return embedding_prototypes, embedding_prototypes_labels
 
 
+def print_true_positive_given_labels_and_datasets(test_true_labels, test_pred_labels, train_celltype, test_celltype):
+    cell_count = 0
+    cell_pred = 0
+    for i in range(len(test_pred_labels)):
+        if test_true_labels[i] == test_celltype:
+            cell_count += 1
+            if test_pred_labels[i] == train_celltype:
+                cell_pred += 1
+    print("True positive " + test_celltype + ": " + str(cell_pred/cell_count * 100) + '%')
+
+    wrong_dict = {}
+    for i in range(len(test_true_labels)):
+        if test_true_labels[i] == test_celltype and test_pred_labels[i] != train_celltype:
+            if test_pred_labels[i] in wrong_dict.keys():
+                wrong_dict[test_pred_labels[i]] += 1
+            else:
+                wrong_dict[test_pred_labels[i]] = 1
+    {k: v for k, v in sorted(wrong_dict.items(), key=lambda item: item[1], reverse=True)}
+    print(wrong_dict)
+
+
 def plot_embeddings_given_labels_and_datasets(train_embeddings ,test_embeddings, train_true_labels, test_true_labels, test_pred_labels, train_celltype, test_celltype, prototypes, prototypes_labels):
     cell_count = 0
     cell_pred = 0
@@ -358,6 +379,7 @@ def plot_embeddings_given_labels_and_datasets(train_embeddings ,test_embeddings,
                 wrong_dict[test_pred_labels[i]] += 1
             else:
                 wrong_dict[test_pred_labels[i]] = 1
+    wrong_dict = {k: v for k, v in sorted(wrong_dict.items(), key=lambda item: item[1], reverse=True)}
     print(wrong_dict)
     
     fig, ax = plt.subplots(figsize=(30, 20))
