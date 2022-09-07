@@ -120,7 +120,7 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
             if 'pl' in loss_mode:
                 pl_loss = PL(centers = model.prototypes.data, weights=init_weights, vars=model.vars)
                 pl_loss_ = pl_loss(embeddings, y)
-                loss = loss + 1000*pl_loss_
+                loss = loss + pl_loss_
             if 'disto' in loss_mode:
                 disto_loss = delta(model.prototypes)
                 loss = loss + disto_loss
@@ -175,7 +175,7 @@ def train_logistic_regression(dataset, train_indices, test_indices, obs_name, en
     y_train = encoder.transform(dataset.obs[obs_name][train_indices])
     X_test = dataset.X[test_indices]
     y_test = encoder.transform(dataset.obs[obs_name][test_indices])
-    clf = LogisticRegression(random_state=0, solver='lbfgs', multi_class='multinomial').fit(X_train, y_train)
+    clf = LogisticRegression(random_state=0, solver='lbfgs', multi_class='multinomial', max_iter=1000).fit(X_train, y_train)
     print('Logistic Regression')
     print('Train error: {}%'.format((1 - clf.score(X_train, y_train))*100))
     print('Test error: {}%'.format((1 - clf.score(X_test, y_test))*100))

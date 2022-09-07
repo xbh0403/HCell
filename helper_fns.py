@@ -214,7 +214,8 @@ def build_hierarchical_tree_popv_immune(all_nodes, list_ct, list_inner_nodes, en
 
                 (transform('regulatory T cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('naive regulatory T cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
 
-                (transform('thymocyte', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('double-positive, alpha-beta thymocyte', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                # Commented out because there are only 6 cells in the dataset
+                # (transform('thymocyte', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('double-positive, alpha-beta thymocyte', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('thymocyte', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('DN3 thymocyte', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('thymocyte', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('DN4 thymocyte', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('thymocyte', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('DN1 thymic pro-T cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
@@ -245,7 +246,8 @@ def get_dist_df(list_num_ct, g):
 
 def get_ensembl_mappings():                                   
     # Set up connection to server
-    server = biomart.BiomartServer('http://uswest.ensembl.org/biomart')
+    # server = biomart.BiomartServer('http://uswest.ensembl.org/biomart')
+    server = biomart.BiomartServer('http://ensembl.org/biomart')
     mart = server.datasets['hsapiens_gene_ensembl']
     attributes = ['hgnc_symbol', 'ensembl_gene_id']
                                                                                 
@@ -284,9 +286,10 @@ def plot_distance_matrix(mode, model, dist_df, dataset, encoder_celltype, test_i
     print(np.mean(np.array(dist_list)))
     sns.displot(dist_list)
     plt.show(block=False)
+    return np.mean(np.array(dist_list))
 
 
-def plot_confusion_matrix(mode, model, dataset, encoder, test_indices, obs_name):
+def plot_confusion_matrix(mode, model, dataset, encoder, test_indices, obs_name, size=30):
     y_test = dataset[test_indices].obs[obs_name]
     if mode == 'Net':
         if torch.cuda.is_available():
@@ -303,7 +306,7 @@ def plot_confusion_matrix(mode, model, dataset, encoder, test_indices, obs_name)
     cm = confusion_matrix(y_test, pred)
     # Normalise
     cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-    fig, ax = plt.subplots(figsize=(30,30))
+    fig, ax = plt.subplots(figsize=(size,size))
     sns.heatmap(cm, annot=True, fmt='.2f', xticklabels=encoder.inverse_transform(range(len(dataset.obs[obs_name].unique().tolist()))),
                                         yticklabels=encoder.inverse_transform(range(len(dataset.obs[obs_name].unique().tolist()))))
     plt.xlabel('Actual')
@@ -358,8 +361,12 @@ def print_true_positive_given_labels_and_datasets(test_true_labels, test_pred_la
                 wrong_dict[test_pred_labels[i]] += 1
             else:
                 wrong_dict[test_pred_labels[i]] = 1
-    {k: v for k, v in sorted(wrong_dict.items(), key=lambda item: item[1], reverse=True)}
+    wrong_dict = {k: v for k, v in sorted(wrong_dict.items(), key=lambda item: item[1], reverse=True)}
     print(wrong_dict)
+    wrong_dict['Celltype'] = train_celltype
+    wrong_dict['true_positive_rate'] = cell_pred/cell_count * 100
+
+    return wrong_dict
 
 
 def plot_embeddings_given_labels_and_datasets(train_embeddings ,test_embeddings, train_true_labels, test_true_labels, test_pred_labels, train_celltype, test_celltype, prototypes, prototypes_labels):
