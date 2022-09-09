@@ -17,7 +17,7 @@ def costumized_train_test_split(dataset, cross_validation=False, obs_key='Manual
     train_indices, test_indices, cv = [], [], []
     for cell_type in dataset.obs[obs_key].unique():
         indices = np.where(dataset.obs[obs_key] == cell_type)[0]
-        np.random.shuffle(indices)
+        np.random.shuffle(indices, random_state=1)
         indices_by_celltypes.update({cell_type: indices})
         split = int(len(indices)/k_fold)
         if cross_validation:

@@ -16,19 +16,19 @@ from sklearn.neighbors import KNeighborsClassifier
 # Pytorch version of the 3 fully connected layers
 # No problem
 class Net(nn.Module):
-    def __init__(self, mode, input_size, hidden_size_1, hidden_size_2, hidden_size_3, output_size):
+    def __init__(self, mode, input_size, hidden_size_1, hidden_size_2, output_size):
         super(Net, self).__init__()
         self.mode = mode
         self.fc1 = nn.Linear(input_size, hidden_size_1)
+        self.dropout = nn.Dropout(0.2)
         self.fc2 = nn.Linear(hidden_size_1, hidden_size_2)
-        self.fc3 = nn.Linear(hidden_size_2, hidden_size_3)
-        self.fc4 = nn.Linear(hidden_size_3, output_size)
+        self.fc3 = nn.Linear(hidden_size_2, output_size)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
+        x = self.dropout(x)
         x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = self.fc4(x)
+        x = self.fc3(x)
         return x
 
 # No problem
@@ -60,13 +60,13 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
     # A simple neural network no problem
     if mode == 'Net':
         if torch.cuda.is_available():
-            model = Net(mode, 128, 32, 37).cuda()
+            model = Net(mode, 128, 64, 32, 37).cuda()
         else:
-            model = Net(mode, 128, 32, 37)
+            model = Net(mode, 128, 64, 32, 37)
     # Learnt prototype & Simple neural network encoder no problem
     elif mode == 'Proto_Net':
         if torch.cuda.is_available():
-            model = Net(mode, 128, 32, embedding_dim).cuda()
+            model = Net(mode, 128, 64, 32, embedding_dim).cuda()
             centers = []
             vars = []
             for i in range(len(num_celltypes)):
@@ -78,15 +78,15 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
             model = prototypical_network.LearntPrototypes(model, n_prototypes= D.shape[0],
                     prototypes=centers, vars=vars, embedding_dim=embedding_dim, device='cuda').cuda()
         else:
-            model = Net(mode, 128, 64, 32, 16, embedding_dim)
+            model = Net(mode, 128, 64, 32, embedding_dim)
             centers = []
             vars = []
             for i in range(len(num_celltypes)):
                 out = model(torch.tensor(dataset[dataset.obs[obs_name] == encoder.inverse_transform([i])[0]].X))
                 centers.append(np.array(torch.mean(out, dim=0).detach()))
                 vars.append(np.array(torch.var(out, dim=0).detach()))
-            centers = torch.tensor(centers, dtype=float)
-            vars = torch.tensor(vars, dtype=float)
+            centers = torch.tensor(np.array(centers), dtype=float)
+            vars = torch.tensor(np.array(vars), dtype=float)
             model = prototypical_network.LearntPrototypes(model, n_prototypes= D.shape[0],
                     prototypes=centers, vars=vars, embedding_dim=embedding_dim, device='cpu')
     # Cross entropy loss no problem
@@ -134,15 +134,15 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
                 for i in range(len(num_celltypes)):
                     out, embeddings = model(torch.tensor(dataset[dataset.obs[obs_name] == encoder.inverse_transform([i])[0]].X)).cpu()
                     vars.append(np.array(torch.var(embeddings, dim=0).detach().cpu()))
-                model.vars = torch.tensor(vars, dtype=float).cuda()
+                model.vars = torch.tensor(np.array(vars), dtype=float).cuda()
             else:
                 for i in range(len(num_celltypes)):
                     out, embeddings = model(torch.tensor(dataset[dataset.obs[obs_name] == encoder.inverse_transform([i])[0]].X))
                     vars.append(np.array(torch.var(embeddings, dim=0).detach()))
-                model.vars = torch.tensor(vars, dtype=float)
+                model.vars = torch.tensor(np.array(vars), dtype=float)
         t1 = time.time()
-        
-        print('Train ER {:.2f}, time {:.1f}s'.format(ER_meter.value()[0], t1-t0))
+        if epoch == epochs:
+            print('Train ER {:.2f}, time {:.1f}s'.format(ER_meter.value()[0], t1-t0))
 
         model.eval()
         ER_meter = ClassErrorMeter(accuracy=False)
@@ -165,7 +165,8 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
             pred = out.detach()
             ER_meter.add(pred.cpu(),y)
         t1 = time.time()
-        print('Test ER {:.2f}, time {:.1f}s'.format(ER_meter.value()[0], t1-t0))
+        if epoch == epochs:
+            print('Test ER {:.2f}, time {:.1f}s'.format(ER_meter.value()[0], t1-t0))
     return model
 
 
