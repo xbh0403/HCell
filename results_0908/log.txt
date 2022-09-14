@@ -1,0 +1,87 @@
+FULL MODEL Fold 1:
+Train ER 7.16
+Test ER 7.94
+
+FULL MODEL Fold 2:
+Train ER 7.11
+Test ER 8.20
+
+FULL MODEL Fold 3:
+Train ER 7.23
+Test ER 8.13
+
+FULL MODEL Fold 4:
+Train ER 7.11
+Test ER 8.04
+
+FULL MODEL Fold 5:
+Train ER 7.06
+Test ER 8.25
+
+
+ProtoNet+Distortion Fold 1:
+Train ER 7.02
+Test ER 7.93
+
+ProtoNet+Distortion Fold 2:
+Train ER 7.09
+Test ER 8.21
+
+ProtoNet+Distortion Fold 3:
+Train ER 7.18
+Test ER 8.02
+
+ProtoNet+Distortion Fold 4:
+Train ER 7.16
+Test ER 7.98
+
+ProtoNet+Distortion Fold 5:
+Train ER 7.11
+Test ER 8.17
+
+
+net Fold 1:
+Train ER 7.13
+Test ER 8.05
+
+net Fold 2:
+Train ER 7.04
+Test ER 8.21
+
+net Fold 3:
+Train ER 7.16
+Test ER 8.32
+
+net Fold 4:
+Train ER 7.27
+Test ER 8.12
+
+net Fold 5:
+Train ER 7.04
+Test ER 8.22
+
+
+Logistic Fold 1:
+Logistic Regression
+Train error: 7.9167156805081795%
+Test error: 8.448649157488465%
+
+Logistic Fold 2:
+Logistic Regression
+Train error: 7.889660039995294%
+Test error: 8.534939910257622%
+
+Logistic Fold 3:
+Logistic Regression
+Train error: 7.891620593655646%
+Test error: 8.472182999152778%
+
+Logistic Fold 4:
+Logistic Regression
+Train error: 7.937105438575854%
+Test error: 8.250964887508239%
+
+Logistic Fold 5:
+Logistic Regression
+Train error: 7.870446614123827%
+Test error: 8.520819605259033%

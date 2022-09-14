@@ -17,7 +17,8 @@ def costumized_train_test_split(dataset, cross_validation=False, obs_key='Manual
     train_indices, test_indices, cv = [], [], []
     for cell_type in dataset.obs[obs_key].unique():
         indices = np.where(dataset.obs[obs_key] == cell_type)[0]
-        np.random.shuffle(indices, random_state=1)
+        np.random.seed(1)
+        np.random.shuffle(indices)
         indices_by_celltypes.update({cell_type: indices})
         split = int(len(indices)/k_fold)
         if cross_validation:
@@ -82,6 +83,11 @@ def transform(x, list_ct ,list_inner_nodes, encoder_celltype, encoder_celltype_i
     else:
         return encoder_celltype.transform([x])[0]
 
+def inverse_transform(x, list_ct, encoder_celltype, encoder_celltype_inner):
+    if x >= len(list_ct):
+        return encoder_celltype_inner.inverse_transform([x-len(list_ct)])[0]
+    else:
+        return encoder_celltype.inverse_transform([x])[0]
 
 def build_hierarchical_tree_celltypist(all_nodes, list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner):
     g = ig.Graph()

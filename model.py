@@ -20,13 +20,13 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.mode = mode
         self.fc1 = nn.Linear(input_size, hidden_size_1)
-        self.dropout = nn.Dropout(0.2)
+        # self.dropout = nn.Dropout(0.2)
         self.fc2 = nn.Linear(hidden_size_1, hidden_size_2)
         self.fc3 = nn.Linear(hidden_size_2, output_size)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
-        x = self.dropout(x)
+        # x = self.dropout(x)
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
@@ -60,9 +60,9 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
     # A simple neural network no problem
     if mode == 'Net':
         if torch.cuda.is_available():
-            model = Net(mode, 128, 64, 32, 37).cuda()
+            model = Net(mode, 128, 64, 32, len(num_celltypes)).cuda()
         else:
-            model = Net(mode, 128, 64, 32, 37)
+            model = Net(mode, 128, 64, 32, len(num_celltypes))
     # Learnt prototype & Simple neural network encoder no problem
     elif mode == 'Proto_Net':
         if torch.cuda.is_available():
@@ -95,12 +95,14 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
     delta = DistortionLoss(D_metric)
     opt = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
     # Train & Test model, no problem
+    # t0 = time.time()
     for epoch in range(1, epochs+1):
-        print('Epoch {}'.format(epoch))
-        ER_meter = ClassErrorMeter(accuracy=False)
+        # if epoch == epochs:
+        #     print('Epoch {}'.format(epoch))
+        ER_meter_train = ClassErrorMeter(accuracy=False)
 
         model.train()
-        t0 = time.time()
+        # t0 = time.time()
         for batch in dataloader_training:
             if torch.cuda.is_available():
                 x = batch.X.cuda()
@@ -127,7 +129,7 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
             loss.backward()
             opt.step()
             pred = out.detach()
-            ER_meter.add(pred.cpu(),y.cpu())
+            ER_meter_train.add(pred.cpu(),y.cpu())
         vars = []
         if mode == 'Proto_Net':
             if torch.cuda.is_available():
@@ -140,13 +142,14 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
                     out, embeddings = model(torch.tensor(dataset[dataset.obs[obs_name] == encoder.inverse_transform([i])[0]].X))
                     vars.append(np.array(torch.var(embeddings, dim=0).detach()))
                 model.vars = torch.tensor(np.array(vars), dtype=float)
-        t1 = time.time()
+        # t1 = time.time()
         if epoch == epochs:
-            print('Train ER {:.2f}, time {:.1f}s'.format(ER_meter.value()[0], t1-t0))
+            # print('Train ER {:.2f}, time {:.1f}s'.format(ER_meter_train.value()[0], t1-t0))
+            print('Train ER {:.2f}'.format(ER_meter_train.value()[0]))
 
         model.eval()
-        ER_meter = ClassErrorMeter(accuracy=False)
-        t0 = time.time()
+        ER_meter_test = ClassErrorMeter(accuracy=False)
+        # t0 = time.time()
         for batch in dataloader_testing:
             if torch.cuda.is_available():
                 x = batch.X.cuda()
@@ -163,11 +166,12 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
                 with torch.no_grad():
                     out, embeddings = model(x)
             pred = out.detach()
-            ER_meter.add(pred.cpu(),y)
-        t1 = time.time()
+            ER_meter_test.add(pred.cpu(),y)
+        # t1 = time.time()
         if epoch == epochs:
-            print('Test ER {:.2f}, time {:.1f}s'.format(ER_meter.value()[0], t1-t0))
-    return model
+            print('Test ER {:.2f}'.format(ER_meter_test.value()[0]))
+            # print('Test ER {:.2f}, time {:.1f}s'.format(ER_meter_test.value()[0], t1-t0))
+    return model, {'train': ER_meter_train.value()[0], 'test': ER_meter_test.value()[0]}
 
 
 # logistic regression
@@ -178,9 +182,11 @@ def train_logistic_regression(dataset, train_indices, test_indices, obs_name, en
     y_test = encoder.transform(dataset.obs[obs_name][test_indices])
     clf = LogisticRegression(random_state=0, solver='lbfgs', multi_class='multinomial', max_iter=1000).fit(X_train, y_train)
     print('Logistic Regression')
-    print('Train error: {}%'.format((1 - clf.score(X_train, y_train))*100))
-    print('Test error: {}%'.format((1 - clf.score(X_test, y_test))*100))
-    return clf
+    training_error = (1 - clf.score(X_train, y_train))*100
+    testing_error = (1 - clf.score(X_test, y_test))*100
+    print('Train error: {}%'.format(training_error))
+    print('Test error: {}%'.format(testing_error))
+    return clf, {'train': training_error, 'test': testing_error}
 
 
 # kNN
@@ -191,6 +197,9 @@ def train_knn(dataset, train_indices, test_indices, obs_name, encoder):
     y_test = encoder.transform(dataset.obs[obs_name][test_indices])
     clf = KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
     print('kNN')
-    print('Train error: {}%'.format((1 - clf.score(X_train, y_train))*100))
-    print('Test error: {}%'.format((1 - clf.score(X_test, y_test))*100))
+    # training_error = (1 - clf.score(X_train, y_train))*100
+    # testing_error = (1 - clf.score(X_test, y_test))*100
+    # print('Train error: {}%'.format(training_error))
+    # print('Test error: {}%'.format(testing_error))
+    # return clf, {'train': training_error, 'test': testing_error}
     return clf
