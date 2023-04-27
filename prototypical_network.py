@@ -21,10 +21,12 @@ class LearntPrototypes(nn.Module):
         n_prototypes,
         embedding_dim,
         prototypes=None,
+        vars=None,
         squarred=False,
         ph=None,
         dist="euclidean",
         device="cuda",
+        mode=""
     ):
         """
 
@@ -45,35 +47,46 @@ class LearntPrototypes(nn.Module):
                 torch.rand((n_prototypes, embedding_dim), device=device)
             ).requires_grad_(True)
             if prototypes is None
-            else nn.Parameter(prototypes).requires_grad_(False)
+            else nn.Parameter(prototypes).requires_grad_(True)
         )
+        self.vars = vars
         self.n_prototypes = n_prototypes
         self.squarred = squarred
         self.dist = dist
         self.ph = None if ph is None else Pseudo_Huber(delta=ph)
-
-    # def forward(self, *input, **kwargs):
-    #     embeddings = self.model(*input, **kwargs)
-    #     features = embeddings
-    #     distributions = []
-    #     for center in self.prototypes:
-    #         distributions.append(multivariate_normal.MultivariateNormal(loc=center.detach().cpu(), covariance_matrix=torch.eye(6).detach().cpu()))
-
-    #     dists = torch.Tensor(np.zeros((embeddings.shape[0], self.prototypes.shape[0])))
-
-    #     for i in range(dists.shape[0]):
-    #         for j in range(dists.shape[1]):
-    #             dists[i,j] = torch.exp(distributions[j].log_prob(embeddings[i].detach().cpu()))
-        
-
-    #     return dists.cuda(), features
+        self.mode = mode
     
-    def forward(self, *input, **kwargs):
-        embeddings = self.model(*input, **kwargs)
+    # def forward(self, *input, **kwargs):
+    #     [[x_hat, decoder_mu, decoder_log_var], x, mean, log_var] = self.model(*input, **kwargs)
+    #     embeddings = self.model.reparameterize(mean, log_var)
+    #     # embeddings, x_hat, mean, log_var = self.model(*input, **kwargs)
+    #     dists = torch.norm(
+    #         embeddings[:, None, :] - self.prototypes[None, :, :], dim=-1
+    #     )
 
-        dists = torch.norm(
-            embeddings[:, None, :] - self.prototypes[None, :, :], dim=-1
-        )
+    #     return -dists, embeddings, x_hat, mean, log_var, decoder_mu, decoder_log_var
+
+    def forward(self, *input, **kwargs):
+        if self.mode == "":
+            x = self.model(*input, **kwargs)
+            embeddings = x
+            # embeddings, x_hat, mean, log_var = self.model(*input, **kwargs)
+            dists = torch.norm(
+                embeddings[:, None, :] - self.prototypes[None, :, :], dim=-1
+            )
+        elif self.mode == "VAE":
+            [[x_hat, decoder_mu, decoder_log_var], x, mean, log_var] = self.model(*input, **kwargs)
+            embeddings = self.model.reparameterize(mean, log_var)
+            # embeddings, x_hat, mean, log_var = self.model(*input, **kwargs)
+            temp_1 = embeddings[:, None, :]
+            temp_2 = self.prototypes[None, :, :]
+            temp_3 = temp_1 - temp_2
+            # dists = torch.norm(
+            #     embeddings[:, None, :] - self.prototypes[None, :, :], dim=-1
+            # )
+            dists = torch.norm(temp_3, dim=-1)
+
+            return -dists, embeddings, x_hat, mean, log_var, decoder_mu, decoder_log_var
 
         return -dists, embeddings
 
