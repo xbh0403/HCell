@@ -29,6 +29,8 @@ class Net(nn.Module):
         # x = self.dropout(x)
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
+        # if self.mode == 'Net_softmax':
+        #     x = F.softmax(x, dim=1)
         return x
 
 # No problem
@@ -58,7 +60,7 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
     else:
         D_metric = D
     # A simple neural network no problem
-    if mode == 'Net':
+    if mode == 'Net_softmax':
         if torch.cuda.is_available():
             model = Net(mode, 128, 64, 32, len(num_celltypes)).cuda()
         else:
@@ -112,7 +114,7 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
                 y = batch.obs[obs_name].type(torch.LongTensor)
             y = y.squeeze()
             y.long()
-            if mode == 'Net':
+            if mode == 'Net_softmax':
                 out = model(x)
             elif mode == 'Proto_Net':
                 out, embeddings = model(x)
@@ -159,7 +161,7 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
                 y = batch.obs[obs_name].type(torch.LongTensor)
             y = y.squeeze()
             y.long()
-            if mode == 'Net':
+            if mode == 'Net_softmax':
                 with torch.no_grad():
                     out = model(x)
             elif mode == 'Proto_Net':
@@ -172,6 +174,44 @@ def train(mode, loss_mode, epochs, embedding_dim, D, num_celltypes, encoder, dat
             print('Test ER {:.2f}'.format(ER_meter_test.value()[0]))
             # print('Test ER {:.2f}, time {:.1f}s'.format(ER_meter_test.value()[0], t1-t0))
     return model, {'train': ER_meter_train.value()[0], 'test': ER_meter_test.value()[0]}
+
+
+def init_model(mode, embedding_dim, D, num_celltypes):
+    if mode == 'Net_softmax':
+        if torch.cuda.is_available():
+            model = Net(mode, 128, 64, 32, len(num_celltypes)).cuda()
+        else:
+            model = Net(mode, 128, 64, 32, len(num_celltypes))
+    # Learnt prototype & Simple neural network encoder no problem
+    elif mode == 'Proto_Net':
+        if torch.cuda.is_available():
+            model = Net(mode, 128, 64, 32, embedding_dim).cuda()
+            centers = []
+            vars = []
+            for i in range(len(num_celltypes)):
+                # out = model(torch.tensor(dataset[dataset.obs[obs_name] == encoder.inverse_transform([i])[0]].X))
+                out = torch.tensor(np.zeros((2, embedding_dim)), dtype=float)
+                centers.append(np.array(torch.mean(out, dim=0)))
+                vars.append(np.array(torch.var(out, dim=0)))
+            centers = torch.tensor(centers, dtype=float).cuda()
+            vars = torch.tensor(vars, dtype=float).cuda()
+            model = prototypical_network.LearntPrototypes(model, n_prototypes= D.shape[0],
+                    prototypes=centers, vars=vars, embedding_dim=embedding_dim, device='cuda').cuda()
+        else:
+            model = Net(mode, 128, 64, 32, embedding_dim)
+            centers = []
+            vars = []
+            for i in range(len(num_celltypes)):
+                # out = model(torch.tensor(dataset[dataset.obs[obs_name] == encoder.inverse_transform([i])[0]].X))
+                # out = model(torch.tensor(np.zeros(128), dtype=float))
+                out = torch.tensor(np.zeros((2, embedding_dim)), dtype=float)
+                centers.append(np.array(torch.mean(out, dim=0).detach()))
+                vars.append(np.array(torch.var(out, dim=0).detach()))
+            centers = torch.tensor(np.array(centers), dtype=float)
+            vars = torch.tensor(np.array(vars), dtype=float)
+            model = prototypical_network.LearntPrototypes(model, n_prototypes= D.shape[0],
+                    prototypes=centers, vars=vars, embedding_dim=embedding_dim, device='cpu')
+    return model
 
 
 # logistic regression

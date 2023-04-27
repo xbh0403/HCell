@@ -95,7 +95,8 @@ def build_hierarchical_tree_celltypist(all_nodes, list_ct, list_inner_nodes, enc
     g.vs['name'] = np.append(encoder_celltype.inverse_transform(list(range(len(list_ct)))), encoder_celltype_inner.inverse_transform(list(range(len(list_inner_nodes)))))
     g.add_edges([(transform('Cross-tissue Immune Cell Atlas', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('B cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('Cross-tissue Immune Cell Atlas', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Myeloid', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
-                (transform('Cross-tissue Immune Cell Atlas', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('T & Innate lymphoid cells', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner))])
+                (transform('Cross-tissue Immune Cell Atlas', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('T & Innate lymphoid cells', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Cross-tissue Immune Cell Atlas', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Progenitor', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),])
     g.add_edges([(transform('B cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('ABCs', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('B cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Germinal center B cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('B cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Memory B cells', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
@@ -109,10 +110,14 @@ def build_hierarchical_tree_celltypist(all_nodes, list_ct, list_inner_nodes, enc
     g.add_edges([(transform('Myeloid', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Cycling', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('Myeloid', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Dendritic cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('Myeloid', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Macrophages', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
-                (transform('Myeloid', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Monocytes', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner))])
+                (transform('Myeloid', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Monocytes', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Myeloid', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Mast cells', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Myeloid', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Erythroid', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Myeloid', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Megakaryocytes', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),])
     g.add_edges([(transform('Dendritic cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('DC1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('Dendritic cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('DC2', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
-                (transform('Dendritic cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('migDC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner))])
+                (transform('Dendritic cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('migDC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Dendritic cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('pDC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner))])
     g.add_edges([(transform('Macrophages', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Alveolar macrophages', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('Macrophages', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Erythrophagocytic macrophages', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('Macrophages', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Intermediate macrophages', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
@@ -230,6 +235,74 @@ def build_hierarchical_tree_popv_immune(all_nodes, list_ct, list_inner_nodes, en
                 (transform('NK', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('immature natural killer cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
                 (transform('NK', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('type I NK T cell', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner))
                 ])
+    return g
+
+def build_hierarchical_tree_rgc(all_nodes, list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner):
+    g = ig.Graph()
+    g.add_vertices(len(all_nodes))
+    g.vs['name'] = np.append(encoder_celltype.inverse_transform(list(range(len(list_ct)))), encoder_celltype_inner.inverse_transform(list(range(len(list_inner_nodes)))))
+    g.add_edges([(transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('7_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('8_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('10_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('11_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('13_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('15_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('18_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('19_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('20_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('24_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('25_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('26_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('27_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('29_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('30_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('34_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('35_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('36_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('37_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('39_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('44_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('5_J-RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('W3', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('W3', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('W3D', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('W3', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('6_W3B', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('W3D', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('W3D1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('W3D', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('23_W3D2', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('W3D1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('1_W3D1.1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('W3D1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('2_W3D1.2', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('F', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('F', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Fmini', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Fmini', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('3_FminiON', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Fmini', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('4_FminiOFF', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('F', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Fmidi', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Fmidi', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('38_FmidiON', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Fmidi', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('28_FmidiOFF', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('F', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('32_F_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('ooDS', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('ooDS', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('14_ooDS_Cck', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('ooDS', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('12_ooDS_NT', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('ooDS', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('16_ooDS_DV', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('M', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('M', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('M1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('M1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('33_M1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('M1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('40_M1dup', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('M', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('31_M2', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('M', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('22_M5', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Tbr1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Tbr1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('9_Tbr1_Novel', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Tbr1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('17_Tbr1_S1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Tbr1', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('21_Tbr1_S2', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+
+                (transform('RGC', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('Alpha', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Alpha', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('41_AlphaONT', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Alpha', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('42_AlphaOFFS', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Alpha', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('43_AlphaONS', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),
+                (transform('Alpha', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner), transform('45_AlphaOFFT', list_ct, list_inner_nodes, encoder_celltype, encoder_celltype_inner)),])
     return g
 
 
